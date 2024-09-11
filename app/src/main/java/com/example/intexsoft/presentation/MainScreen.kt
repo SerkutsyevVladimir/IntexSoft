@@ -23,26 +23,36 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
+import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SearchBar
+import androidx.compose.material3.SheetValue
 import androidx.compose.material3.Text
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.rememberAsyncImagePainter
+import com.example.intexsoft.presentation.model.DVOItem
+import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
@@ -54,19 +64,47 @@ fun MainScreen() {
     val isSearching by viewModel.isSearching.collectAsState()
     val items by viewModel.itemsList.collectAsState()
 
+    val sheetState = rememberModalBottomSheetState()
+    var showBottomSheet by remember { mutableStateOf(false) }
+
     val images = listOf(
-        "https://example.com/image1.jpg",
-        "https://example.com/image2.jpg",
-        "https://example.com/image3.jpg"
+        "https://rickandmortyapi.com/api/character/avatar/1.jpeg",
+        "https://rickandmortyapi.com/api/character/avatar/2.jpeg",
+        "https://rickandmortyapi.com/api/character/avatar/3.jpeg",
+        "https://rickandmortyapi.com/api/character/avatar/4.jpeg",
+        "https://rickandmortyapi.com/api/character/avatar/5.jpeg",
+        "https://rickandmortyapi.com/api/character/avatar/6.jpeg"
     )
 
     Scaffold(
         floatingActionButton = {
-            FloatingActionButton(onClick = { /* Show Bottom Sheet */ }) {
-                Icon(Icons.Filled.Add, contentDescription = "Show Stats")
+            FloatingActionButton(
+                onClick = {
+                    showBottomSheet = true
+                },
+                shape = CircleShape,
+                containerColor = Color(0xFF4285F4),
+                contentColor = Color.White
+            ) {
+                Icon(Icons.Default.MoreVert, contentDescription = "Show Stats")
             }
         }
     ) {
+
+        if (
+            showBottomSheet
+        ) {
+            ModalBottomSheet(
+                onDismissRequest = {
+                    showBottomSheet = false
+                },
+                sheetState = sheetState,
+                content = {
+                    BottomSheetContent(items = items)
+                }
+            )
+        }
+
         Column {
             ImageSliderWithDots(
                 images = images,
@@ -81,19 +119,20 @@ fun MainScreen() {
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(16.dp)
-            ) {
-                LazyColumn {
-                    items(
-                        items = items,
-                    ) { item ->
-                        ScrollListItem(
-                            imageUrl = "https://rickandmortyapi.com/api/character/avatar/1.jpeg",
-                            title = item.title,
-                            subtitle = item.body,
-                        )
-                    }
+            ) {}
+
+            LazyColumn {
+                items(
+                    items = items,
+                ) { item ->
+                    ScrollListItem(
+                        imageUrl = "https://rickandmortyapi.com/api/character/avatar/1.jpeg",
+                        title = item.title,
+                        subtitle = item.body,
+                    )
                 }
             }
+
         }
     }
 }
@@ -200,9 +239,11 @@ fun PreviewSlider() {
 }
 
 @Composable
-fun BottomSheetContent(items: List<String>) {
+fun BottomSheetContent(items: List<DVOItem>) {
     val itemCount = items.size
-    val charStats = items.joinToString("").groupBy { it }.mapValues { it.value.size }
+    val allCharacters = items.joinToString(separator = "") { it.title + it.body }
+    val charStats = allCharacters.groupBy { it }
+        .mapValues { it.value.size }
     val top3Chars = charStats.entries.sortedByDescending { it.value }.take(3)
 
     Column(modifier = Modifier.padding(16.dp)) {
