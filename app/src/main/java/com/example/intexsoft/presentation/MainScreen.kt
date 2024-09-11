@@ -59,7 +59,7 @@ fun MainScreen() {
     val searchText by viewModel.searchText.collectAsState()
     val items by viewModel.itemsList.collectAsState()
 
-    //Todo: Make collapsing work
+    //Todo: Added for collapsing
     /*val listState = rememberLazyListState()
     val isCollapsed: Boolean by remember {
         derivedStateOf { listState.firstVisibleItemIndex > 1 }}*/
@@ -93,7 +93,6 @@ fun MainScreen() {
             }
         }
     ) {
-
 
         if (
             showBottomSheet
@@ -164,7 +163,6 @@ fun MainScreen() {
         }
     }
 }
-
 
 @Composable
 fun ImageSliderWithDots(images: List<String>) {
