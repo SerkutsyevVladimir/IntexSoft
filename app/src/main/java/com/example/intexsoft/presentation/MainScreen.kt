@@ -1,6 +1,7 @@
 package com.example.intexsoft.presentation
 
 import android.annotation.SuppressLint
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -22,15 +23,13 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.SearchBar
-import androidx.compose.material3.SheetValue
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
@@ -39,30 +38,31 @@ import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.rememberAsyncImagePainter
 import com.example.intexsoft.presentation.model.DVOItem
-import kotlinx.coroutines.launch
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
 fun MainScreen() {
     val viewModel = MainActivityViewModel()
 
     val searchText by viewModel.searchText.collectAsState()
-    val isSearching by viewModel.isSearching.collectAsState()
     val items by viewModel.itemsList.collectAsState()
+
+    //Todo: Make collapsing work
+    /*val listState = rememberLazyListState()
+    val isCollapsed: Boolean by remember {
+        derivedStateOf { listState.firstVisibleItemIndex > 1 }}*/
 
     val sheetState = rememberModalBottomSheetState()
     var showBottomSheet by remember { mutableStateOf(false) }
@@ -73,10 +73,13 @@ fun MainScreen() {
         "https://rickandmortyapi.com/api/character/avatar/3.jpeg",
         "https://rickandmortyapi.com/api/character/avatar/4.jpeg",
         "https://rickandmortyapi.com/api/character/avatar/5.jpeg",
-        "https://rickandmortyapi.com/api/character/avatar/6.jpeg"
     )
 
     Scaffold(
+        //Todo: Added for collapsing
+        /*topBar = {
+            CollapsedTopBar(isCollapsed = isCollapsed, images = images)
+        },*/
         floatingActionButton = {
             FloatingActionButton(
                 onClick = {
@@ -90,6 +93,7 @@ fun MainScreen() {
             }
         }
     ) {
+
 
         if (
             showBottomSheet
@@ -105,21 +109,46 @@ fun MainScreen() {
             )
         }
 
+        //Todo: Added for collapsing
+        /*
+         CompositionLocalProvider(LocalOverscrollConfiguration provides null) {
+              LazyColumn {
+                  item {
+                      OutlinedTextField(
+                          value = searchText,
+                          onValueChange = viewModel::onSearchTextChange,
+                          label = { Text("Search") },
+                          modifier = Modifier
+                              .fillMaxWidth()
+                              .padding(16.dp)
+                      )
+                  }
+                  items(
+                      items = items,
+                  ) { item ->
+                      ScrollListItem(
+                          imageUrl = "https://rickandmortyapi.com/api/character/avatar/1.jpeg",
+                          title = item.title,
+                          subtitle = item.body,
+                      )
+                  }
+              }
+          }
+          */
+
         Column {
             ImageSliderWithDots(
                 images = images,
             )
 
-            SearchBar(
-                query = searchText,
-                onQueryChange = viewModel::onSearchTextChange,
-                onSearch = viewModel::onSearchTextChange,
-                active = isSearching,
-                onActiveChange = { viewModel.onToogleSearch() },
+            OutlinedTextField(
+                value = searchText,
+                onValueChange = viewModel::onSearchTextChange,
+                label = { Text("Search") },
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(16.dp)
-            ) {}
+            )
 
             LazyColumn {
                 items(
@@ -132,7 +161,6 @@ fun MainScreen() {
                     )
                 }
             }
-
         }
     }
 }
@@ -233,7 +261,6 @@ fun PreviewSlider() {
         "https://rickandmortyapi.com/api/character/avatar/3.jpeg",
         "https://rickandmortyapi.com/api/character/avatar/4.jpeg",
         "https://rickandmortyapi.com/api/character/avatar/5.jpeg",
-        "https://rickandmortyapi.com/api/character/avatar/6.jpeg"
     )
     ImageSliderWithDots(images = images)
 }
@@ -294,6 +321,29 @@ fun ScrollListItem(
         }
     }
 }
+
+//Todo: Added for collapsing
+/*
+@OptIn(ExperimentalFoundationApi::class)
+@Composable
+private fun CollapsedTopBar(
+    modifier: Modifier = Modifier,
+    isCollapsed: Boolean,
+    images: List<String>,
+) {
+    Box(
+        modifier = modifier
+            .fillMaxWidth()
+            .height(56.dp)
+            .padding(16.dp),
+        contentAlignment = Alignment.BottomStart
+    ) {
+        AnimatedVisibility(visible = isCollapsed) {
+            ImageSliderWithDots(images = images)
+        }
+    }
+}
+ */
 
 @Preview(showBackground = true)
 @Composable
